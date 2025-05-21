@@ -10,7 +10,7 @@ locale                   : "en-US"
 title                    : "Home"
 title_separator          : "-"
 name                     : &name "Christopher Harth-Kitzerow"
-description              : &description " PhD student - Secure Multiparty Computation "
+description              : &description "Software Engineer - Autonomous Driving at BMW Group. Researcher - Privacy Preserving Machine Learning at the Technical University of Munich (TUM)"
 url                      : https://chart21.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
 repository               : "chart21/chart21.github.io"
@@ -82,7 +82,7 @@ analytics:
 author:
   name             : "Christopher Harth-Kitzerow"
   avatar           : "christopher_cropped.jpg"
-  bio              : "PhD Student - Secure Multiparty Computation"
+  bio              : "Software Engineer and Reseracher"
   location         : "Munich, Germany"
   employer         : "BMW Group, TUM"
   pubmed           : 
@@ -123,6 +123,7 @@ include:
   - _pages
   - files
 exclude:
+  - vencor/
   - "*.sublime-project"
   - "*.sublime-workspace"
   - .asset-cache

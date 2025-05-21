@@ -6,9 +6,9 @@ collection: publications
 permalink: 
 excerpt: 
 date: 2023-10-03
-authors: Christopher Harth-Kitzerow, Georg Carle
-venue: 
-paperurl: 'https://arxiv.org/pdf/2206.03776'
+authors: Christopher Harth-Kitzerow, Ajith Suresh, Yongqin Wang, Murali Annavaram, Georg Carle
+venue: 25th Privacy Enhancing Technologies Symposium (PETS 2025)
+paperurl: 'https://eprint.iacr.org/2024/386'
 codeurl: 'https://github.com/chart21/hpmpc'
 citation: 
 ---
