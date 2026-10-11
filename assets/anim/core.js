@@ -1,12 +1,13 @@
 /* Hero animation runtime. Each animation draws a virtual 1000x1000 square in the site's colour tokens.
    ANIM.def(name, {title, blurb, still, draw(ctx, t, col, state)}) registers one; draw should depend on the time t (ms)
-   only, using state as a cache, so that `still` (a time in ms) gives one meaningful frame for reduced motion.
-   ANIM.mount(canvas, name) starts it and returns a stop function; canvas[data-anim] elements mount on load. */
+   only, using state as a cache; `still` (a time in ms) names one meaningful frame of the animation.
+   ANIM.mount(canvas, name) starts it and returns a stop function; canvas[data-anim] elements mount on load.
+   The animations deliberately run whatever prefers-reduced-motion says (user's decision, 2026-10-11): they used to
+   freeze on their `still` frame, which made them look broken on a phone with "Remove animations" turned on. */
 (function () {
   "use strict";
   const defs = {};
   const TOKENS = ["ink", "muted", "line", "accent", "signal", "card", "paper"];
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)");
   const scheme = matchMedia("(prefers-color-scheme: dark)");
 
   function parse(c) {
@@ -118,7 +119,7 @@
       const s = Math.min(w, h) / 1000;
       ctx.setTransform(s, 0, 0, s, (w - 1000 * s) / 2, (h - 1000 * s) / 2);
       ctx.save();
-      try { d.draw(ctx, reduce.matches ? (d.still || 0) : acc, col, state); } finally { ctx.restore(); }
+      try { d.draw(ctx, acc, col, state); } finally { ctx.restore(); }
     }
     function frame(now) {
       raf = 0;
@@ -126,12 +127,12 @@
       if (last) acc += Math.min(now - last, 100); // no jump after a pause
       last = now;
       paint();
-      if (visible && !document.hidden && !reduce.matches) raf = requestAnimationFrame(frame);
+      if (visible && !document.hidden) raf = requestAnimationFrame(frame);
       else last = 0;
     }
     function kick() {
       if (!alive) return;
-      if (reduce.matches || !visible || document.hidden) { if (!raf) paint(); return; }
+      if (!visible || document.hidden) { if (!raf) paint(); return; }
       if (!raf) { last = 0; raf = requestAnimationFrame(frame); }
     }
     function recolour() { requestAnimationFrame(() => { if (!alive) return; col = colours(canvas); if (!raf) paint(); }); }
@@ -144,7 +145,6 @@
     const mo = new MutationObserver(recolour);
     mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "style", "data-theme"] });
     scheme.addEventListener("change", recolour);
-    reduce.addEventListener("change", kick);
     document.addEventListener("visibilitychange", kick);
     if (document.fonts) document.fonts.ready.then(repaint);
     kick();
@@ -154,7 +154,6 @@
       if (raf) cancelAnimationFrame(raf);
       io.disconnect(); ro.disconnect(); mo.disconnect();
       scheme.removeEventListener("change", recolour);
-      reduce.removeEventListener("change", kick);
       document.removeEventListener("visibilitychange", kick);
       if (canvas._animStop === stop) canvas._animStop = null;
     }
