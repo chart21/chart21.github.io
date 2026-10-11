@@ -1,5 +1,5 @@
-// Private inference: a secret-shared input flows through a neural network whose activations stay encrypted (locked);
-// only the final class scores are opened.
+// Private inference: a secret-shared input flows through a neural network whose weights and activations stay
+// encrypted (locked); only the final class scores are opened.
 (() => {
   const P = 9000, LX = [300, 440, 580, 720], SIZES = [4, 5, 5, 3], CY = 470, GAP = 118, T0 = 600, STEP = 800;
   const CLASSES = ["car", "bike", "person"];
@@ -23,8 +23,8 @@
 
   ANIM.def("pnn", {
     title: "Private inference",
-    blurb: "A secret-shared input flows through a neural network with encrypted activations; only the result is opened.",
-    still: 5600,
+    blurb: "Inference on encrypted weights and data: the input and the network stay secret-shared, only the result is opened.",
+    still: 3750, // every layer lit and still locked, with the last pulse arriving
     draw(ctx, t, col) {
       const n = Math.floor(t / P), u = t % P, r = ANIM.rng(n * 31 + 3);
       const cls = n % 3, scores = CLASSES.map((_, i) => (i === cls ? 0.9 + r() * 0.08 : 0.01 + r() * 0.04));
@@ -100,7 +100,9 @@
 
       ctx.fillStyle = col.muted;
       ctx.globalAlpha = 1 - show;
-      ANIM.text(ctx, "activations stay encrypted", 500, 880, 36);
+      // two lines: a single one would run under the play button in the canvas's bottom-right corner
+      ANIM.text(ctx, "inference on encrypted", 500, 858, 38);
+      ANIM.text(ctx, "weights and data", 500, 904, 38);
       ctx.globalAlpha = show;
       ANIM.text(ctx, "only the result is opened", 500, 880, 36);
     },
