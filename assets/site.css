@@ -99,6 +99,7 @@ footer { padding-block:40px 60px; border-top:1px solid var(--line); display:flex
   .brand { display:none; }
   /* one row of tabs that scrolls sideways instead of wrapping; it reaches the screen edges */
   .tabs { flex:1; min-width:0; overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none; margin-inline:-16px; padding-inline:16px; }
+  .tabs a { padding-inline:11px; }   /* tighter pills so all four still fit on a 360px screen */
   .tabs::-webkit-scrollbar { display:none; }
   .intro { padding-block:26px 28px; }
   .me { gap:16px; }
