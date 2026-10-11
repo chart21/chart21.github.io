@@ -1,9 +1,10 @@
 /* Hero animation runtime. Each animation draws a virtual 1000x1000 square in the site's colour tokens.
    ANIM.def(name, {title, blurb, still, draw(ctx, t, col, state)}) registers one; draw should depend on the time t (ms)
-   only, using state as a cache; `still` (a time in ms) names one meaningful frame of the animation.
-   ANIM.mount(canvas, name) starts it and returns a stop function; canvas[data-anim] elements mount on load.
-   The animations deliberately run whatever prefers-reduced-motion says (user's decision, 2026-10-11): they used to
-   freeze on their `still` frame, which made them look broken on a phone with "Remove animations" turned on. */
+   only, using state as a cache; `still` (a time in ms) is the frame shown while the animation is paused.
+   ANIM.mount(canvas, name, opts) mounts it and returns a stop function; canvas[data-anim] elements mount on load.
+   Nothing ever plays by itself (user's decision, 2026-10-11): every animation sits on its `still` frame until the
+   visitor presses its play button. prefers-reduced-motion is therefore not consulted at all - there is no motion to
+   suppress, and a press is the visitor asking for it, so it plays whatever the setting says. */
 (function () {
   "use strict";
   const defs = {};
@@ -100,15 +101,55 @@
 
   function def(name, spec) { defs[name] = spec; }
 
-  function mount(canvas, name) {
+  const ICON = { play: "M9 5.8 18.2 12 9 18.2Z", pause: "M9 6.4h2.4v11.2H9zM13.6 6.4H16v11.2h-2.4z" };
+
+  /* Mounts an animation paused on its `still` frame, with a play button next to it; the visitor starts it.
+     opts.play === true runs it straight away and leaves the button out (the gallery compares the motion).
+     A remount of the same canvas (the editor's animation picker) keeps whatever that canvas was doing. */
+  function mount(canvas, name, opts = {}) {
+    const was = canvas._animPlaying === true;
     if (canvas._animStop) canvas._animStop();
     const d = defs[name];
     if (!d) { console.warn("unknown animation", name); return () => {}; }
     const ctx = canvas.getContext("2d");
-    let col = colours(canvas), state = {}, raf = 0, visible = true, alive = true, acc = 0, last = 0;
+    let col = colours(canvas), state = {}, raf = 0, visible = true, alive = true, last = 0;
+    let playing = opts.play === true || (opts.play === undefined && was);
+    let acc = d.still || 0; // the paused frame, and where playing starts from
     canvas.dataset.anim = name;
+    canvas._animPlaying = playing;
     canvas.setAttribute("role", "img");
     canvas.setAttribute("aria-label", d.blurb || d.title || name);
+
+    function control() { // the button lives next to the canvas in a .anim box, one per canvas
+      let box = canvas.parentNode;
+      if (!box) return null;
+      if (!box.classList.contains("anim")) {
+        const w = document.createElement("div");
+        w.className = "anim";
+        box.insertBefore(w, canvas);
+        w.append(canvas);
+        box = w;
+      }
+      let b = box.querySelector(":scope > .anim-play");
+      if (!b) {
+        b = document.createElement("button");
+        b.type = "button";
+        b.className = "anim-play";
+        b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d=""></path></svg>';
+        box.append(b);
+      }
+      b.onclick = toggle; // an assignment, so a remount cannot leave two handlers behind
+      return b;
+    }
+    const btn = opts.play === true ? null : control();
+    function label() {
+      if (!btn) return;
+      btn.querySelector("path").setAttribute("d", playing ? ICON.pause : ICON.play);
+      const s = (playing ? "Pause" : "Play") + " the animation";
+      btn.setAttribute("aria-label", s);
+      btn.title = s;
+    }
+    label();
 
     function paint() {
       const r = canvas.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2.5);
@@ -127,13 +168,20 @@
       if (last) acc += Math.min(now - last, 100); // no jump after a pause
       last = now;
       paint();
-      if (visible && !document.hidden) raf = requestAnimationFrame(frame);
+      if (playing && visible && !document.hidden) raf = requestAnimationFrame(frame);
       else last = 0;
     }
     function kick() {
       if (!alive) return;
-      if (!visible || document.hidden) { if (!raf) paint(); return; }
+      if (!playing || !visible || document.hidden) { if (!raf) paint(); return; }
       if (!raf) { last = 0; raf = requestAnimationFrame(frame); }
+    }
+    function toggle() { // a click is the visitor asking for motion: it always plays
+      playing = !playing;
+      canvas._animPlaying = playing;
+      label();
+      if (playing) kick();
+      else if (raf) { cancelAnimationFrame(raf); raf = 0; last = 0; }
     }
     function recolour() { requestAnimationFrame(() => { if (!alive) return; col = colours(canvas); if (!raf) paint(); }); }
     function repaint() { if (alive && !raf) paint(); }
@@ -155,6 +203,7 @@
       io.disconnect(); ro.disconnect(); mo.disconnect();
       scheme.removeEventListener("change", recolour);
       document.removeEventListener("visibilitychange", kick);
+      if (btn) btn.onclick = null;
       if (canvas._animStop === stop) canvas._animStop = null;
     }
     canvas._animStop = stop;

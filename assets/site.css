@@ -43,7 +43,18 @@ section, footer { scroll-margin-top:calc(var(--bar) - 1px); }
 .duo { display:grid; grid-template-columns:1fr 1fr; gap:22px; padding-bottom:64px; }
 .panel { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:24px; min-width:0; display:flex; flex-direction:column; }
 .panel .eyebrow { margin-bottom:4px; }
-.panel canvas { display:block; width:100%; max-width:340px; aspect-ratio:1/1; margin:8px auto 18px; }
+/* Animations never play by themselves: the canvas shows one still frame and .anim-play starts it (tools/site/anim/core.js). */
+.panel .anim { position:relative; width:100%; max-width:340px; margin:8px auto 18px; }
+.panel .anim canvas { display:block; width:100%; aspect-ratio:1/1; }
+.anim-play { position:absolute; right:0; bottom:0; width:44px; height:44px; display:grid; place-items:center; padding:0;
+  border:0; background:none; color:var(--muted); cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.anim-play::before { content:""; position:absolute; inset:5px; border-radius:50%; background:var(--card);
+  border:1px solid var(--line); transition:border-color .15s; }
+.anim-play svg { position:relative; width:17px; height:17px; display:block; }
+.anim-play:hover { color:var(--ink); }
+.anim-play:hover::before { border-color:var(--muted); }
+.anim-play:focus-visible { outline:none; }
+.anim-play:focus-visible::before { outline:2px solid var(--accent); outline-offset:2px; }
 .panel p { margin:0 0 16px; font-size:17.5px; color:var(--ink); }
 .more { margin-top:auto; font-weight:600; text-decoration:none; }
 .more::after { content:" ↓"; }
@@ -93,6 +104,6 @@ footer { padding-block:40px 60px; border-top:1px solid var(--line); display:flex
   .me { gap:16px; }
   .avatar { width:84px; height:84px; }
   .intro h1 { font-size:34px; }
-  .duo { grid-template-columns:1fr; } .panel canvas { max-width:280px; }
+  .duo { grid-template-columns:1fr; } .panel .anim { max-width:280px; }
   .rows > li { grid-template-columns:minmax(0,1fr); gap:2px; }
 }
