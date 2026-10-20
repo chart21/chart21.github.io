@@ -72,6 +72,18 @@ h2 { font:600 36px/1.1 var(--display); margin:0 0 22px; text-wrap:balance; }
 .pubs a { font:500 20px/1.3 var(--display); color:var(--ink); text-decoration:none; }
 .pubs a:hover { color:var(--accent); }
 .authors { color:var(--muted); font-size:15px; }
+/* Recorded lecture: the video with its chapters beside it (stacked on phones); a chapter seeks (tools/site/lecture.js). */
+.lecture { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); gap:24px; align-items:start; }
+.lecture video { display:block; width:100%; height:auto; aspect-ratio:16/9; background:#000; border-radius:12px; border:1px solid var(--line); }
+.lecture h4 { margin:6px 0 8px; font:600 22px/1.25 var(--display); }
+.lecture p { margin:0 0 14px; color:var(--muted); font-size:15.5px; }
+.chapters { list-style:none; padding:0; margin:0 -8px; display:grid; gap:1px; }
+.chapters button { display:flex; gap:12px; align-items:baseline; width:100%; padding:4px 8px; border:0; border-radius:8px;
+  background:none; color:var(--ink); font:15px/1.45 var(--body); text-align:left; cursor:pointer; }
+.chapters button:hover { background:color-mix(in srgb, var(--ink) 6%, transparent); }
+.chapters button[aria-current="true"] { background:color-mix(in srgb, var(--accent) 14%, transparent); }
+.chapters button:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+.chapters .ts { flex:none; min-width:56px; font:13px/1.65 var(--mono); color:var(--accent); }
 .projs { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:18px; }
 .proj { border:1px solid var(--line); border-radius:12px; padding:20px; background:var(--card); min-width:0; }
 .proj h3 { margin:0 0 6px; font:600 20px var(--display); } .proj h3 a { color:var(--ink); }
@@ -106,5 +118,6 @@ footer { padding-block:40px 60px; border-top:1px solid var(--line); display:flex
   .avatar { width:84px; height:84px; }
   .intro h1 { font-size:34px; }
   .duo { grid-template-columns:1fr; } .panel .anim { max-width:280px; }
+  .lecture { grid-template-columns:minmax(0,1fr); gap:16px; }
   .rows > li { grid-template-columns:minmax(0,1fr); gap:2px; }
 }
